@@ -12,6 +12,6 @@ fun initKoinModule(
     runCatching { stopKoin() }
     startKoin {
         appDeclaration()
-        modules(listOf(networkModule) + additionalModules)
+        modules(listOf(networkModule, coreModule) + additionalModules)
     }
 }
