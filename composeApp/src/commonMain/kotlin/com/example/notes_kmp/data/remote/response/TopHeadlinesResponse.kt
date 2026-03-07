@@ -10,7 +10,6 @@ data class TopHeadlinesResponse(
     @SerialName("status") val status: String,
     @SerialName("totalResults") val totalResults: Int = 0,
     @SerialName("articles") val articles: List<ArticleResponse> = emptyList(),
-    // Error fields
     @SerialName("code") val code: String? = null,
     @SerialName("message") val message: String? = null
 )

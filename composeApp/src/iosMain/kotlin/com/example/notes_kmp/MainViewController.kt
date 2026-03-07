@@ -5,7 +5,7 @@ import com.example.notes_kmp.di.initKoinModule
 import com.example.notes_kmp.presentation.screen.NotesApp
 
 fun MainViewController() = ComposeUIViewController(
-    configure = { initKoinModule(additionalModules = listOf()) }
+    configure = { initKoinModule() }
 ) {
     NotesApp()
 }

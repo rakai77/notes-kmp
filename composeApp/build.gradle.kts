@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -41,18 +42,20 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.jetbrains.compose.navigation)
             implementation(libs.icon.extended.md3)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network)
 
 
             // put your Multiplatform dependencies here
             implementation(libs.ktor.core)
             implementation(libs.ktor.auth)
-            implementation(libs.ktor.cio)
             implementation(libs.ktor.logging)
             implementation(libs.ktor.serialization)
             implementation(libs.ktor.encoding)
             implementation(libs.ktor.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.ktor.client.websockets)
+
+            implementation(libs.kermit)
 
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.coroutines.core)
