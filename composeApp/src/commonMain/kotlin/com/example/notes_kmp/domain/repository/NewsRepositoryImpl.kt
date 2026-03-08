@@ -51,4 +51,36 @@ class NewsRepositoryImpl(
             emit(BaseResult.Error.NetworkError(e))
         }
     }.flowOn(context)
+
+    override suspend fun searchNews(
+        query: String,
+        sortBy: String
+    ): Flow<BaseResult<TopHeadline>>  =  flow{
+        try {
+            val response = newsService.getEverything(query, sortBy)
+            if (response.status == "ok") {
+                emit(BaseResult.Success(response.toDomain()))
+            } else {
+                emit(
+                    BaseResult.Error.HttpError(
+                        httpCode = 400,
+                        apiCode = NewsApiErrorCode.fromCode(response.code.orEmpty()),
+                        message = response.message.orEmpty()
+                    )
+                )
+            }
+        } catch (e: ClientRequestException) {
+            emit(
+                BaseResult.Error.HttpError(
+                    httpCode = e.response.status.value,
+                    apiCode = NewsApiErrorCode.fromCode(e.message),
+                    message = e.message
+                )
+            )
+        } catch (e: ServerResponseException) {
+            emit(BaseResult.Error.NetworkError(e))
+        } catch (e: Exception) {
+            emit(BaseResult.Error.NetworkError(e))
+        }
+    }.flowOn(context)
 }

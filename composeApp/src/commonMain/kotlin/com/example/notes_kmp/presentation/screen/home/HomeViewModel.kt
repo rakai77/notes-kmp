@@ -3,6 +3,8 @@ package com.example.notes_kmp.presentation.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes_kmp.common.BaseResult
+import com.example.notes_kmp.domain.model.TopHeadline
+import com.example.notes_kmp.domain.usecase.GetSearchNewsUseCase
 import com.example.notes_kmp.domain.usecase.GetTopHeadlineUseCase
 import com.example.notes_kmp.presentation.screen.component.NewsCategory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val useCase: GetTopHeadlineUseCase
+    private val topHeadlineUseCase: GetTopHeadlineUseCase,
+    private val searchUseCase: GetSearchNewsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -24,55 +27,75 @@ class HomeViewModel(
         loadTopHeadlines()
     }
 
+    fun onSearchQueryChange(query: String) {
+        _state.update { it.copy(searchQuery = query) }
+        if (query.isBlank()) {
+            _state.update { it.copy(isSearchActive = false) }
+            loadTopHeadlines()
+        }
+    }
+
+    fun onSearch() {
+        val query = _state.value.searchQuery.trim()
+        if (query.isBlank()) return
+        _state.update { it.copy(isSearchActive = true) }
+        searchNews(query)
+    }
+
     fun onCategorySelected(category: NewsCategory) {
         if (_state.value.selectedCategory == category) return
-        _state.update { it.copy(selectedCategory = category) }
+        _state.update {
+            it.copy(
+                selectedCategory = category,
+                searchQuery = "",
+                isSearchActive = false
+            )
+        }
         loadTopHeadlines()
     }
 
     fun loadTopHeadlines() {
         val category = _state.value.selectedCategory
-
         viewModelScope.launch {
-            useCase(
+            topHeadlineUseCase(
                 country = "us",
                 category = category.value,
                 pageSize = 100,
                 page = 1
             )
-                .onStart {
-                    _state.update { it.copy(isLoading = true, error = null) }
+                .onStart { _state.update { it.copy(isLoading = true, error = null) } }
+                .onCompletion { _state.update { it.copy(isLoading = false) } }
+                .collect { result -> handleResult(result) }
+        }
+    }
+
+    private fun searchNews(query: String) {
+        viewModelScope.launch {
+            searchUseCase(query = query)
+                .onStart { _state.update { it.copy(isLoading = true, error = null) } }
+                .onCompletion { _state.update { it.copy(isLoading = false) } }
+                .collect { result -> handleResult(result) }
+        }
+    }
+
+    private fun handleResult(result: BaseResult<TopHeadline>) {
+        when (result) {
+            is BaseResult.Success -> {
+                _state.update {
+                    it.copy(articles = result.data.articles, isLoading = false)
                 }
-                .onCompletion {
-                    _state.update { it.copy(isLoading = false) }
+            }
+            is BaseResult.Error.HttpError -> {
+                _state.update { it.copy(isLoading = false, error = result.message) }
+            }
+            is BaseResult.Error.NetworkError -> {
+                _state.update {
+                    it.copy(isLoading = false, error = result.throwable.message ?: "Network error")
                 }
-                .collect { result ->
-                    when (result) {
-                        is BaseResult.Success -> {
-                            _state.update {
-                                it.copy(
-                                    articles = result.data.articles,
-                                    isLoading = false,
-                                )
-                            }
-                        }
-                        is BaseResult.Error.HttpError -> {
-                            _state.update {
-                                it.copy(isLoading = false, error = result.message)
-                            }
-                        }
-                        is BaseResult.Error.NetworkError -> {
-                            _state.update {
-                                it.copy(isLoading = false, error = result.throwable.message ?: "Network error")
-                            }
-                        }
-                        is BaseResult.Error.UnknownError -> {
-                            _state.update {
-                                it.copy(isLoading = false, error = "Unknown error")
-                            }
-                        }
-                    }
-                }
+            }
+            is BaseResult.Error.UnknownError -> {
+                _state.update { it.copy(isLoading = false, error = "Unknown error") }
+            }
         }
     }
 }

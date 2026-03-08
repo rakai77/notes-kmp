@@ -11,4 +11,9 @@ interface NewsService {
         pageSize: Int = 10,
         page: Int = 1
     ): TopHeadlinesResponse
+
+    suspend fun getEverything(
+        query: String,
+        sortBy: String,
+    ): TopHeadlinesResponse
 }

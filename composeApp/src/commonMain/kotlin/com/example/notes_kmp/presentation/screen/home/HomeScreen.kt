@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -29,9 +30,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -50,7 +48,6 @@ fun HomeScreen(navController: NavHostController) {
     val viewModel: HomeViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
-    var search by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -73,15 +70,17 @@ fun HomeScreen(navController: NavHostController) {
                 .padding(paddingValues)
         ) {
             OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
+                value = state.searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
                 placeholder = { Text("Search news...") },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 },
                 trailingIcon = {
-                    if (search.isNotBlank()) {
-                        IconButton(onClick = { search = "" }) {
+                    if (state.searchQuery.isNotBlank()) {
+                        IconButton(onClick = {
+                            viewModel.onSearchQueryChange("")
+                        }) {
                             Icon(Icons.Default.Clear, contentDescription = "Clear")
                         }
                     }
@@ -89,14 +88,19 @@ fun HomeScreen(navController: NavHostController) {
                 singleLine = true,
                 shape = RoundedCornerShape(50),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = { viewModel.onSearch() }
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
-            CategoryRow(
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = viewModel::onCategorySelected
-            )
+            if (!state.isSearchActive) {
+                CategoryRow(
+                    selectedCategory = state.selectedCategory,
+                    onCategorySelected = viewModel::onCategorySelected
+                )
+            }
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     state.isLoading -> ShimmerList()

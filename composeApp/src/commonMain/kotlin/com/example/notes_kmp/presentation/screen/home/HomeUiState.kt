@@ -7,5 +7,7 @@ data class HomeUiState (
     val articles: List<Article> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val selectedCategory: NewsCategory = NewsCategory.GENERAL
+    val selectedCategory: NewsCategory = NewsCategory.GENERAL,
+    val searchQuery: String = "",
+    val isSearchActive: Boolean = false
 )

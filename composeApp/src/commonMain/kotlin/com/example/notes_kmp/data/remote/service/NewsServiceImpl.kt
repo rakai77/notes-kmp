@@ -25,4 +25,16 @@ class NewsServiceImpl(private val httpClient: HttpClient) : NewsService {
             parameter("page", page)
         }.body()
     }
+
+    override suspend fun getEverything(
+        query: String,
+        sortBy: String
+    ): TopHeadlinesResponse {
+        return httpClient.get(Endpoint.EVERYTHING) {
+            parameter("q", query)
+            parameter("sortBy", sortBy)
+            parameter("pageSize", "100")
+            parameter("page", "1")
+        }.body()
+    }
 }

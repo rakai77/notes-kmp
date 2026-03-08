@@ -6,9 +6,11 @@ import com.example.notes_kmp.data.remote.service.NewsServiceImpl
 import com.example.notes_kmp.data.remote.setupHttpClient
 import com.example.notes_kmp.domain.repository.NewsRepository
 import com.example.notes_kmp.domain.repository.NewsRepositoryImpl
+import com.example.notes_kmp.domain.usecase.GetSearchNewsUseCase
 import com.example.notes_kmp.domain.usecase.GetTopHeadlineUseCase
 import com.example.notes_kmp.presentation.screen.home.HomeViewModel
 import com.example.notes_kmp.provideHttpClientEngine
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -34,6 +36,8 @@ val coreModule = module {
     } bind NewsRepository::class
 
     factory { GetTopHeadlineUseCase(get()) }
+
+    factoryOf(::GetSearchNewsUseCase)
 
     viewModelOf(::HomeViewModel)
 }

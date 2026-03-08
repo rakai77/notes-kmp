@@ -13,4 +13,6 @@ interface NewsRepository {
         pageSize: Int = 10,
         page: Int = 1
     ): Flow<BaseResult<TopHeadline>>
+
+    suspend fun searchNews(query: String, sortBy: String): Flow<BaseResult<TopHeadline>>
 }
