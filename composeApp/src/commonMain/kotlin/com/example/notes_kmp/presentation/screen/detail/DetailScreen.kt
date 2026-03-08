@@ -96,7 +96,6 @@ fun DetailScreen(
                 state = state,
                 navigator = navigator,
                 modifier = Modifier.fillMaxSize()
-                // ← onCreated dihapus
             )
 
             val loadingState = state.loadingState

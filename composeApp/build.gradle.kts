@@ -59,15 +59,18 @@ kotlin {
 
             implementation(libs.webview.multiplatform)
 
-            api(libs.kotlinx.serialization.json)
-            api(libs.kotlinx.coroutines.core)
-            api(libs.kotlinx.datetime)
-            api(libs.koin.core)
-            api(libs.koin.compose.viewmodel)
-            api(libs.koin.compose)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.turbine)
+            implementation(libs.coroutines.test)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
