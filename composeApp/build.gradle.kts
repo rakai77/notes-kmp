@@ -57,6 +57,8 @@ kotlin {
 
             implementation(libs.kermit)
 
+            implementation(libs.webview.multiplatform)
+
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)

@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.notes_kmp.presentation.route.AppRoute
 import com.example.notes_kmp.presentation.screen.component.CategoryRow
 import com.example.notes_kmp.presentation.screen.component.NewsCard
 import com.example.notes_kmp.presentation.screen.component.ShimmerList
@@ -144,7 +145,11 @@ fun HomeScreen(navController: NavHostController) {
                             items(items = state.articles, key = { it.url }) { article ->
                                 NewsCard(
                                     article = article,
-                                    onClick = { /* TODO: navigate to detail */ }
+                                    onClick = {
+                                        navController.navigate(
+                                            AppRoute.DetailScreen.name + "?url=${article.url}"
+                                        )
+                                    }
                                 )
                             }
                         }
