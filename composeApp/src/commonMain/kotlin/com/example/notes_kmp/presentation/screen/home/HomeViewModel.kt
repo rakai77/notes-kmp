@@ -7,6 +7,8 @@ import com.example.notes_kmp.domain.model.TopHeadline
 import com.example.notes_kmp.domain.usecase.GetSearchNewsUseCase
 import com.example.notes_kmp.domain.usecase.GetTopHeadlineUseCase
 import com.example.notes_kmp.presentation.screen.component.NewsCategory
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,27 +25,41 @@ class HomeViewModel(
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
+    private var searchJob: Job? = null
+
     init {
         loadTopHeadlines()
     }
 
     fun onSearchQueryChange(query: String) {
         _state.update { it.copy(searchQuery = query) }
+
+        searchJob?.cancel()
+
         if (query.isBlank()) {
             _state.update { it.copy(isSearchActive = false) }
             loadTopHeadlines()
+            return
+        }
+
+        searchJob = viewModelScope.launch {
+            delay(500)
+            _state.update { it.copy(isSearchActive = true) }
+            searchNews(query.trim())
         }
     }
 
     fun onSearch() {
         val query = _state.value.searchQuery.trim()
         if (query.isBlank()) return
+        searchJob?.cancel()
         _state.update { it.copy(isSearchActive = true) }
         searchNews(query)
     }
 
     fun onCategorySelected(category: NewsCategory) {
         if (_state.value.selectedCategory == category) return
+        searchJob?.cancel()
         _state.update {
             it.copy(
                 selectedCategory = category,
@@ -81,17 +97,13 @@ class HomeViewModel(
     private fun handleResult(result: BaseResult<TopHeadline>) {
         when (result) {
             is BaseResult.Success -> {
-                _state.update {
-                    it.copy(articles = result.data.articles, isLoading = false)
-                }
+                _state.update { it.copy(articles = result.data.articles, isLoading = false) }
             }
             is BaseResult.Error.HttpError -> {
                 _state.update { it.copy(isLoading = false, error = result.message) }
             }
             is BaseResult.Error.NetworkError -> {
-                _state.update {
-                    it.copy(isLoading = false, error = result.throwable.message ?: "Network error")
-                }
+                _state.update { it.copy(isLoading = false, error = result.throwable.message ?: "Network error") }
             }
             is BaseResult.Error.UnknownError -> {
                 _state.update { it.copy(isLoading = false, error = "Unknown error") }
