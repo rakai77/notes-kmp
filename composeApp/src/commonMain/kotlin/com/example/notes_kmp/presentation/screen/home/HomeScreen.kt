@@ -38,15 +38,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.example.notes_kmp.presentation.screen.component.CategoryRow
 import com.example.notes_kmp.presentation.screen.component.NewsCard
 import com.example.notes_kmp.presentation.screen.component.ShimmerList
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(
-    navController: NavHostController,
-) {
+fun HomeScreen(navController: NavHostController) {
     val viewModel: HomeViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
@@ -72,30 +71,17 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
             OutlinedTextField(
                 value = search,
-                onValueChange = {
-                    search = it
-                },
+                onValueChange = { search = it },
                 placeholder = { Text("Search news...") },
                 leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search"
-                    )
+                    Icon(Icons.Default.Search, contentDescription = "Search")
                 },
                 trailingIcon = {
                     if (search.isNotBlank()) {
-                        IconButton(
-                            onClick = {
-                                search = ""
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear search"
-                            )
+                        IconButton(onClick = { search = "" }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Clear")
                         }
                     }
                 },
@@ -106,25 +92,21 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             )
-
+            CategoryRow(
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = viewModel::onCategorySelected
+            )
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
-                    state.isLoading -> {
-                        ShimmerList()
-                    }
+                    state.isLoading -> ShimmerList()
 
                     state.error != null && state.articles.isEmpty() -> {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
+                            modifier = Modifier.fillMaxSize().padding(24.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = "😕",
-                                style = MaterialTheme.typography.displayMedium
-                            )
+                            Text("😕", style = MaterialTheme.typography.displayMedium)
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = state.error ?: "Something went wrong",
@@ -140,16 +122,11 @@ fun HomeScreen(
 
                     state.articles.isEmpty() -> {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
+                            modifier = Modifier.fillMaxSize().padding(24.dp),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = "🔍",
-                                style = MaterialTheme.typography.displayMedium
-                            )
+                            Text("🔍", style = MaterialTheme.typography.displayMedium)
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
                                 text = "No news found",
@@ -164,15 +141,10 @@ fun HomeScreen(
                             state = listState,
                             contentPadding = PaddingValues(vertical = 8.dp)
                         ) {
-                            items(
-                                items = state.articles,
-                                key = { it.url }
-                            ) { article ->
+                            items(items = state.articles, key = { it.url }) { article ->
                                 NewsCard(
                                     article = article,
-                                    onClick = {
-                                        //TODO: Handle to detail
-                                    }
+                                    onClick = { /* TODO: navigate to detail */ }
                                 )
                             }
                         }
